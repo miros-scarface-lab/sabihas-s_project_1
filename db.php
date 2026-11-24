@@ -186,11 +186,13 @@ if ($conn && !$conn->connect_error) {
 
     $claimColCheck = @$conn->query("SHOW COLUMNS FROM `matches` LIKE 'claim_status'");
     if ($claimColCheck && $claimColCheck->num_rows === 0) {
-        @$conn->query("ALTER TABLE `matches` ADD COLUMN `claim_status` VARCHAR(50) DEFAULT 'None' AFTER `status`");
+        @$conn->query("ALTER TABLE `matches` ADD COLUMN `claim_status` VARCHAR(50) DEFAULT 'Not Claimed' AFTER `status`");
     }
     if ($claimColCheck) {
         $claimColCheck->close();
     }
+    // Clean up any default 'None' or empty values so Claim button appears
+    @$conn->query("UPDATE `matches` SET `claim_status` = 'Not Claimed' WHERE `claim_status` IS NULL OR `claim_status` = '' OR `claim_status` = 'None'");
 }
 
 if (!$conn || $conn->connect_error) {

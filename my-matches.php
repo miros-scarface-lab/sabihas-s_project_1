@@ -743,6 +743,62 @@ body {
 }
 
 
+/* APPROVE */
+
+.approve-button {
+
+    background: #16a34a;
+
+}
+
+
+.approve-button:hover {
+
+    background: #15803d;
+
+}
+
+
+/* ITEM DETAIL BUTTON */
+
+.item-detail-btn {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    color: #475569;
+
+    background: #f1f5f9;
+
+    border: 1px solid #e2e8f0;
+
+    padding: 6px 12px;
+
+    border-radius: 6px;
+
+    text-decoration: none;
+
+    transition: 0.2s;
+
+}
+
+
+.item-detail-btn:hover {
+
+    background: #e2e8f0;
+
+    color: #0f172a;
+
+}
+
+
 /* RETURNED BADGE */
 
 .returned-badge {
@@ -993,7 +1049,7 @@ body {
             );
 
 
-        if ($claim_status === '') {
+        if ($claim_status === '' || strtolower($claim_status) === 'none') {
 
             $claim_status =
                 'Not Claimed';
@@ -1265,6 +1321,11 @@ body {
 
                     </div>
 
+                    <div style="margin-top: 14px;">
+                        <a href="item-details.php?type=lost&id=<?php echo (int)$row['lost_id']; ?>" class="item-detail-btn">
+                            🔍 View Details
+                        </a>
+                    </div>
 
                 </div>
 
@@ -1363,6 +1424,11 @@ body {
 
                     </div>
 
+                    <div style="margin-top: 14px;">
+                        <a href="item-details.php?type=found&id=<?php echo (int)$row['found_id']; ?>" class="item-detail-btn">
+                            🔍 View Details
+                        </a>
+                    </div>
 
                 </div>
 
@@ -1648,51 +1714,86 @@ body {
 
                         <?php endif; ?>
 
+                    <?php endif; ?>
 
                     <!-- FINDER -->
 
-                    <?php elseif ($is_finder): ?>
+                    <?php if ($is_finder): ?>
 
                         <?php if ($is_returned): ?>
 
-                            <span
-                                class="status-badge returned-badge"
-                            >
+                            <?php if (!$is_owner): ?>
 
-                                🎉 Successfully Returned
+                                <span
+                                    class="status-badge returned-badge"
+                                >
 
-                            </span>
+                                    🎉 Successfully Returned
+
+                                </span>
+
+                            <?php endif; ?>
 
                         <?php elseif (
                             $claim_status
                             === 'Not Claimed'
                         ): ?>
 
+                            <?php if (!$is_owner): ?>
 
-                            <span
-                                class="status-badge
-                                       not-claimed"
-                            >
+                                <span
+                                    class="status-badge
+                                           not-claimed"
+                                >
 
-                                ○ Not Claimed
+                                    ○ Not Claimed
 
-                            </span>
+                                </span>
 
+                            <?php endif; ?>
 
                         <?php elseif (
                             $claim_status
                             === 'Pending'
                         ): ?>
 
+                            <div style="display:inline-flex; gap:8px; align-items:center; flex-wrap:wrap;">
 
-                            <a
-                                href="view-claim.php?match_id=<?php echo (int)$row['match_id']; ?>"
-                                class="action-button view-claim-button"
-                            >
+                                <a
+                                    href="view-claim.php?match_id=<?php echo (int)$row['match_id']; ?>"
+                                    class="action-button view-claim-button"
+                                >
 
-                                👁 View Claim Request
+                                    👁 View Claim Request
 
-                            </a>
+                                </a>
+
+                                <form
+                                    action="approve-claim.php"
+                                    method="POST"
+                                    style="display:inline;"
+                                >
+
+                                    <input
+                                        type="hidden"
+                                        name="match_id"
+                                        value="<?php
+                                        echo (int)$row['match_id'];
+                                        ?>"
+                                    >
+
+                                    <button
+                                        type="submit"
+                                        class="action-button approve-button"
+                                    >
+
+                                        ✓ Approve Claim
+
+                                    </button>
+
+                                </form>
+
+                            </div>
 
 
                         <?php elseif (

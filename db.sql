@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS `matches` (
   `date_score` INT DEFAULT 0,
   `match_percentage` DECIMAL(5,2) DEFAULT 0.00,
   `status` VARCHAR(50) DEFAULT 'Pending',
-  `claim_status` VARCHAR(50) DEFAULT 'None',
+  `claim_status` VARCHAR(50) DEFAULT 'Not Claimed',
   `finder_status` VARCHAR(50) DEFAULT 'Pending',
   `owner_status` VARCHAR(50) DEFAULT 'Pending',
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

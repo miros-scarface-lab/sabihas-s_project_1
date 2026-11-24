@@ -126,7 +126,7 @@ $stmt->close();
 
 $claim_status = trim($match['claim_status'] ?? '');
 
-if ($claim_status === '') {
+if ($claim_status === '' || strtolower($claim_status) === 'none') {
     $claim_status = 'Not Claimed';
 }
 
@@ -457,24 +457,6 @@ elseif ($action === 'received') {
         $conn->close();
 
         die("Unauthorized action.");
-
-    }
-
-
-    /* ================================
-       CHECK FINDER GIVE BACK
-    ================================= */
-
-    if (
-        trim($match['finder_status'] ?? '')
-        !== 'Give Back'
-    ) {
-
-        $conn->close();
-
-        die(
-            "The finder must confirm Give Back before you can confirm Receive."
-        );
 
     }
 
