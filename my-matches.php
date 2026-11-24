@@ -727,6 +727,37 @@ body {
 }
 
 
+/* VIEW CLAIM */
+
+.view-claim-button {
+
+    background: #6366f1;
+
+}
+
+
+.view-claim-button:hover {
+
+    background: #4f46e5;
+
+}
+
+
+/* RETURNED BADGE */
+
+.returned-badge {
+
+    background: #dcfce7 !important;
+
+    color: #15803d !important;
+
+    border: 1px solid #bbf7d0 !important;
+
+    font-weight: 700 !important;
+
+}
+
+
 /* WAITING */
 
 .waiting-text {
@@ -968,6 +999,14 @@ body {
                 'Not Claimed';
 
         }
+
+        $is_returned = (
+            strtolower(trim((string)($row['status'] ?? ''))) === 'returned' ||
+            (
+                strtolower(trim((string)($row['finder_status'] ?? ''))) === 'give back' &&
+                strtolower(trim((string)($row['owner_status'] ?? ''))) === 'received'
+            )
+        );
 
 
         /* ==============================
@@ -1351,7 +1390,17 @@ body {
                     </div>
 
 
-                    <?php if (
+                    <?php if ($is_returned): ?>
+
+                        <span
+                            class="status-badge returned-badge"
+                        >
+
+                            🎉 Successfully Returned
+
+                        </span>
+
+                    <?php elseif (
                         $claim_status
                         === 'Not Claimed'
                     ): ?>
@@ -1450,8 +1499,17 @@ body {
 
                     <?php if ($is_owner): ?>
 
+                        <?php if ($is_returned): ?>
 
-                        <?php if (
+                            <span
+                                class="status-badge returned-badge"
+                            >
+
+                                🎉 Successfully Returned
+
+                            </span>
+
+                        <?php elseif (
                             $claim_status
                             === 'Not Claimed'
                         ): ?>
@@ -1595,8 +1653,17 @@ body {
 
                     <?php elseif ($is_finder): ?>
 
+                        <?php if ($is_returned): ?>
 
-                        <?php if (
+                            <span
+                                class="status-badge returned-badge"
+                            >
+
+                                🎉 Successfully Returned
+
+                            </span>
+
+                        <?php elseif (
                             $claim_status
                             === 'Not Claimed'
                         ): ?>
@@ -1618,13 +1685,14 @@ body {
                         ): ?>
 
 
-                            <span
-                                class="status-badge pending"
+                            <a
+                                href="view-claim.php?match_id=<?php echo (int)$row['match_id']; ?>"
+                                class="action-button view-claim-button"
                             >
 
-                                ⏳ Claim Pending
+                                👁 View Claim Request
 
-                            </span>
+                            </a>
 
 
                         <?php elseif (

@@ -206,24 +206,23 @@ if ($lost_result && !empty($found_rows)) {
 
 
             /* =====================================
-               FINAL MATCH PERCENTAGE = 100
+               FINAL MATCH PERCENTAGE
                
-               Item Name = 40
-               Category  = 25
-               Location  = 25
-               Date      = 10
+               Item Name = 40%
+               Category  = 25%
+               Location  = 25%
+               Date      = 25% (Capped at 100%)
                ===================================== */
 
             $match_percentage =
-                ($item_name_score * 40 / 100) +
-                ($category_score * 25 / 100) +
-                ($location_score * 25 / 100) +
-                ($date_score * 10 / 100);
+                ($item_name_score * 0.40) +
+                ($category_score * 0.25) +
+                ($location_score * 0.25) +
+                ($date_score * 0.25);
 
-
-            /*
-                দুই decimal পর্যন্ত রাখবে
-            */
+            if ($match_percentage > 100) {
+                $match_percentage = 100;
+            }
 
             $match_percentage =
                 round($match_percentage, 2);
@@ -231,10 +230,10 @@ if ($lost_result && !empty($found_rows)) {
 
             /* =====================================
                MATCH THRESHOLD
-               50 বা তার বেশি হলে Match
+               80% or above to show in matches
                ===================================== */
 
-            if ($match_percentage >= 50 && $check_stmt && $insert_stmt) {
+            if ($match_percentage >= 80 && $check_stmt && $insert_stmt) {
 
                 $lost_id_val = (int) $lost['lost_id'];
                 $found_id_val = (int) $found['found_id'];

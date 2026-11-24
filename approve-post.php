@@ -473,23 +473,21 @@ if ($type == "lost") {
 
         /* =================================================
            WEIGHTED MATCH PERCENTAGE
-
-           Item Name       = 20%
-           Description     = 40%
-           Category        = 10%
-           Location        = 20%
-           Date            = 10%
-
-           TOTAL           = 100%
+           Item Name       = 40%
+           Category        = 25%
+           Location        = 25%
+           Date            = 25% (Capped at 100%)
         ================================================= */
 
         $match_percentage =
-            ($item_name_score * 0.20) +
-            ($description_score * 0.40) +
-            ($category_score * 0.10) +
-            ($location_score * 0.20) +
-            ($date_score * 0.10);
+            ($item_name_score * 0.40) +
+            ($category_score * 0.25) +
+            ($location_score * 0.25) +
+            ($date_score * 0.25);
 
+        if ($match_percentage > 100) {
+            $match_percentage = 100;
+        }
 
         $match_percentage =
             round($match_percentage, 2);
@@ -818,15 +816,21 @@ elseif ($type == "found") {
 
         /* =================================================
            WEIGHTED MATCH PERCENTAGE
+           Item Name       = 40%
+           Category        = 25%
+           Location        = 25%
+           Date            = 25% (Capped at 100%)
         ================================================= */
 
         $match_percentage =
-            ($item_name_score * 0.20) +
-            ($description_score * 0.40) +
-            ($category_score * 0.10) +
-            ($location_score * 0.20) +
-            ($date_score * 0.10);
+            ($item_name_score * 0.40) +
+            ($category_score * 0.25) +
+            ($location_score * 0.25) +
+            ($date_score * 0.25);
 
+        if ($match_percentage > 100) {
+            $match_percentage = 100;
+        }
 
         $match_percentage =
             round($match_percentage, 2);
