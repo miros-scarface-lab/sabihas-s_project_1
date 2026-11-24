@@ -171,6 +171,9 @@ if ($conn && !$conn->connect_error) {
     if ($tableCheck) {
         $tableCheck->close();
     }
+    // Ensure item_image column supports base64 data URIs for serverless deployments
+    @$conn->query("ALTER TABLE lost_items MODIFY COLUMN item_image MEDIUMTEXT NULL");
+    @$conn->query("ALTER TABLE found_items MODIFY COLUMN item_image MEDIUMTEXT NULL");
 }
 
 if (!$conn || $conn->connect_error) {

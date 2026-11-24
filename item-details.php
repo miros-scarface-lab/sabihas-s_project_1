@@ -429,7 +429,7 @@ if (!$item) {
 if (
     $type === 'lost' &&
     !empty($item['item_image']) &&
-    file_exists($item['item_image'])
+    (str_starts_with((string)$item['item_image'], 'data:') || file_exists($item['item_image']))
 ) {
 
 ?>

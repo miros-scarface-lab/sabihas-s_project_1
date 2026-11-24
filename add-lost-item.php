@@ -70,8 +70,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         $destination = $upload_folder . $new_file_name;
 
-        if (move_uploaded_file($tmp_name, $destination)) {
+        if (@move_uploaded_file($tmp_name, $destination)) {
             $item_image = $destination;
+        } else {
+            // On serverless clouds (like Vercel) where local disk is read-only,
+            // store the image as a Data URI directly in the database
+            $fileData = @file_get_contents($tmp_name);
+            if ($fileData !== false) {
+                $item_image = 'data:' . $mime_type . ';base64,' . base64_encode($fileData);
+            }
         }
     }
 
