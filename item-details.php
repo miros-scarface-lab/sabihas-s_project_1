@@ -77,6 +77,10 @@ if (!$item) {
     die("Item not found.");
 }
 
+if (!empty($item['item_image']) && str_starts_with($item['item_image'], 'data:')) {
+    $item['item_image'] = 'image.php?type=' . $type . '&id=' . (int) ($type === 'lost' ? $item['lost_id'] : $item['found_id']);
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -429,7 +433,7 @@ if (!$item) {
 if (
     $type === 'lost' &&
     !empty($item['item_image']) &&
-    (str_starts_with((string)$item['item_image'], 'data:') || file_exists($item['item_image']))
+    (str_starts_with((string)$item['item_image'], 'image.php') || str_starts_with((string)$item['item_image'], 'data:') || file_exists($item['item_image']))
 ) {
 
 ?>

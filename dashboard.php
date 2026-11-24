@@ -110,7 +110,9 @@ if (isset($conn)) {
     if ($lost_result && $lost_result->num_rows > 0) {
 
         while ($row = $lost_result->fetch_assoc()) {
-
+            if (!empty($row['item_image']) && (str_starts_with($row['item_image'], 'data:') || !file_exists(__DIR__ . '/' . ltrim($row['item_image'], '/')))) {
+                $row['item_image'] = 'image.php?type=lost&id=' . (int) $row['lost_id'];
+            }
             $lost_items[] = $row;
         }
     }
@@ -194,7 +196,9 @@ if (isset($conn)) {
     if ($recent_all_result && $recent_all_result->num_rows > 0) {
 
         while ($row = $recent_all_result->fetch_assoc()) {
-
+            if (!empty($row['item_image']) && (str_starts_with($row['item_image'], 'data:') || !file_exists(__DIR__ . '/' . ltrim($row['item_image'], '/')))) {
+                $row['item_image'] = 'image.php?type=' . $row['item_type'] . '&id=' . (int) $row['id'];
+            }
             $recent_all_items[] = $row;
         }
     }

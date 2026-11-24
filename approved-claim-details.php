@@ -500,7 +500,12 @@ if ($is_admin) {
              LOST ITEM IMAGE
         ======================================= -->
 
-        <?php if ($lost_image !== '' && file_exists($image_file)): ?>
+        <?php 
+        $has_approved_img = ($lost_image !== '' && (file_exists($image_file) || str_starts_with($lost_image, 'data:') || str_starts_with($lost_image, 'image.php')));
+        $approved_img_src = (str_starts_with($lost_image, 'data:') || !file_exists($image_file)) ? 'image.php?type=lost&id=' . (int)$match['lost_id'] : $lost_image;
+        ?>
+
+        <?php if ($has_approved_img): ?>
 
             <div class="mb-6">
 
@@ -524,7 +529,7 @@ if ($is_admin) {
                             justify-center">
 
                     <img
-                        src="<?= htmlspecialchars((string) ($lost_image ?? '')) ?>"
+                        src="<?= htmlspecialchars((string) $approved_img_src) ?>"
                         alt="<?= htmlspecialchars((string) ($match['lost_item_name'] ?? '')) ?>"
                         class="max-w-full
                                max-h-full

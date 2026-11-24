@@ -250,7 +250,12 @@ if ($lost_image !== '') {
              LOST ITEM IMAGE
         =================================== -->
 
-        <?php if ($lost_image !== '' && file_exists($image_file)): ?>
+        <?php 
+        $has_claim_lost_img = ($lost_image !== '' && (file_exists($image_file) || str_starts_with($lost_image, 'data:') || str_starts_with($lost_image, 'image.php')));
+        $claim_img_src = (str_starts_with($lost_image, 'data:') || !file_exists($image_file)) ? 'image.php?type=lost&id=' . (int)$match['lost_id'] : $lost_image;
+        ?>
+
+        <?php if ($has_claim_lost_img): ?>
 
             <div class="mb-6">
 
@@ -267,7 +272,7 @@ if ($lost_image !== '') {
                             flex items-center justify-center">
 
                     <img
-                        src="<?= htmlspecialchars((string) ($lost_image ?? '')) ?>"
+                        src="<?= htmlspecialchars((string) $claim_img_src) ?>"
                         alt="<?= htmlspecialchars((string) ($match['lost_item_name'] ?? '')) ?>"
                         class="max-w-full
                                max-h-full

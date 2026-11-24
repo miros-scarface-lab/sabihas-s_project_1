@@ -1212,11 +1212,12 @@ body {
                     ?>
 
 
-                    <?php if (
-                        $lost_image !== '' &&
-                        file_exists($image_file)
-                    ): ?>
+                    <?php 
+                    $has_lost_img = ($lost_image !== '' && (file_exists($image_file) || str_starts_with($lost_image, 'data:') || str_starts_with($lost_image, 'image.php')));
+                    $img_display_src = (str_starts_with($lost_image, 'data:') || !file_exists($image_file)) ? 'image.php?type=lost&id=' . (int)$row['lost_id'] : $lost_image;
+                    ?>
 
+                    <?php if ($has_lost_img): ?>
 
                         <div
                             class="lost-item-image"
@@ -1224,7 +1225,7 @@ body {
 
                             <img
                                 src="<?php
-                                echo htmlspecialchars((string) ($lost_image ?? ''));
+                                echo htmlspecialchars((string) $img_display_src);
                                 ?>"
                                 alt="<?php
                                 echo htmlspecialchars((string) ($row['lost_item_name'] ?? ''));

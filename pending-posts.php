@@ -37,6 +37,9 @@ if (isset($_GET['type']) && $_GET['type'] == 'lost' && isset($_GET['id'])) {
     }
 
     $item = $result->fetch_assoc();
+    if (!empty($item['item_image']) && str_starts_with($item['item_image'], 'data:')) {
+        $item['item_image'] = 'image.php?type=lost&id=' . (int) $item['lost_id'];
+    }
 ?>
 
 <!DOCTYPE html>
@@ -491,6 +494,9 @@ if (isset($_GET['type']) && $_GET['type'] == 'found' && isset($_GET['id'])) {
     }
 
     $item = $result->fetch_assoc();
+    if (!empty($item['item_image']) && str_starts_with($item['item_image'], 'data:')) {
+        $item['item_image'] = 'image.php?type=lost&id=' . (int) $item['lost_id'];
+    }
 ?>
 
 <!DOCTYPE html>
