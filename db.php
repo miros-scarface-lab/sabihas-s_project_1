@@ -73,7 +73,9 @@ if (!empty($databaseUrl)) {
         $dbPass = urldecode($parsed['pass']);
     }
     if (!empty($parsed['path'])) {
-        $dbName = ltrim($parsed['path'], '/');
+        $pathDb = ltrim($parsed['path'], '/');
+        // 'sys' is the internal MySQL maintenance schema. If default 'sys' was copied, use application database.
+        $dbName = ($pathDb === 'sys' || empty($pathDb)) ? 'lost_and_found_db' : $pathDb;
     }
     if (!empty($parsed['port'])) {
         $dbPort = (int) $parsed['port'];
