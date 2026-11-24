@@ -1,4 +1,3 @@
-
 <?php
 
 function isLocalRequest(): bool
@@ -16,13 +15,29 @@ function isLocalRequest(): bool
 
 function isHttpsRequest(): bool
 {
-    return !empty($_SERVER['HTTPS']) &&
-           strtolower((string) $_SERVER['HTTPS']) !== 'off';
+    if (!empty($_SERVER['HTTPS']) && strtolower((string) $_SERVER['HTTPS']) !== 'off') {
+        return true;
+    }
+
+    if (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && strtolower((string) $_SERVER['HTTP_X_FORWARDED_PROTO']) === 'https') {
+        return true;
+    }
+
+    if (!empty($_SERVER['HTTP_X_FORWARDED_SSL']) && strtolower((string) $_SERVER['HTTP_X_FORWARDED_SSL']) === 'on') {
+        return true;
+    }
+
+    // Always HTTPS on Vercel
+    if (!empty($_ENV['VERCEL']) || !empty($_SERVER['VERCEL'])) {
+        return true;
+    }
+
+    return false;
 }
 
 
-// HTTPS REDIRECT
-if (!isLocalRequest() && !isHttpsRequest()) {
+// HTTPS REDIRECT (only on traditional servers when not already HTTPS)
+if (!isLocalRequest() && !isHttpsRequest() && empty($_ENV['VERCEL']) && empty($_SERVER['VERCEL'])) {
     $host = $_SERVER['HTTP_HOST'] ?? '';
     $uri = $_SERVER['REQUEST_URI'] ?? '/';
 
