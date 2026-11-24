@@ -174,6 +174,23 @@ if ($conn && !$conn->connect_error) {
     // Ensure item_image column supports base64 data URIs for serverless deployments
     @$conn->query("ALTER TABLE lost_items MODIFY COLUMN item_image MEDIUMTEXT NULL");
     @$conn->query("ALTER TABLE found_items MODIFY COLUMN item_image MEDIUMTEXT NULL");
+
+    // Ensure matches table has description_score and claim_status
+    $descColCheck = @$conn->query("SHOW COLUMNS FROM `matches` LIKE 'description_score'");
+    if ($descColCheck && $descColCheck->num_rows === 0) {
+        @$conn->query("ALTER TABLE `matches` ADD COLUMN `description_score` INT DEFAULT 0 AFTER `item_name_score`");
+    }
+    if ($descColCheck) {
+        $descColCheck->close();
+    }
+
+    $claimColCheck = @$conn->query("SHOW COLUMNS FROM `matches` LIKE 'claim_status'");
+    if ($claimColCheck && $claimColCheck->num_rows === 0) {
+        @$conn->query("ALTER TABLE `matches` ADD COLUMN `claim_status` VARCHAR(50) DEFAULT 'None' AFTER `status`");
+    }
+    if ($claimColCheck) {
+        $claimColCheck->close();
+    }
 }
 
 if (!$conn || $conn->connect_error) {
