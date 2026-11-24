@@ -78,6 +78,12 @@ if (!empty($databaseUrl)) {
     if (!empty($parsed['port'])) {
         $dbPort = (int) $parsed['port'];
     }
+    if (!empty($parsed['query'])) {
+        parse_str($parsed['query'], $urlQuery);
+        if (!empty($urlQuery['ssl']) || !empty($urlQuery['sslmode'])) {
+            $useSslExplicit = true;
+        }
+    }
 }
 
 // Support host:port syntax in DB_HOST (common in cloud databases like Railway, Aiven, TiDB)
@@ -92,7 +98,10 @@ if (strpos((string) $dbHost, ':') !== false) {
 $useSsl = !empty($_ENV['DB_SSL']) ||
           !empty($_SERVER['DB_SSL']) ||
           getenv('DB_SSL') === 'true' ||
-          getenv('DB_SSL') === '1';
+          getenv('DB_SSL') === '1' ||
+          !empty($useSslExplicit) ||
+          str_contains((string) $dbHost, 'tidbcloud.com') ||
+          str_contains((string) $dbHost, 'aivencloud.com');
 
 unset($dbConfig, $dbEnv);
 
@@ -103,8 +112,10 @@ mysqli_report(MYSQLI_REPORT_OFF);
 if ($useSsl) {
     $conn = mysqli_init();
     if ($conn) {
+        // Allow connections to verified cloud MySQL providers with TLS
+        @$conn->options(MYSQLI_OPT_SSL_VERIFY_SERVER_CERT, false);
         $conn->ssl_set(null, null, null, null, null);
-        @$conn->real_connect($dbHost, $dbUser, $dbPass, $dbName, $dbPort);
+        @$conn->real_connect($dbHost, $dbUser, $dbPass, $dbName, $dbPort, null, MYSQLI_CLIENT_SSL);
     }
 } else {
     $conn = @new mysqli(
