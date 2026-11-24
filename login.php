@@ -103,6 +103,9 @@ if ($result->num_rows > 0) {
         $_SESSION["role"]       = $user["role"];
         session_regenerate_id(true);
 
+        // Keep user logged in across serverless container restarts (30 Days)
+        setUserRememberCookie((int) $user["user_id"]);
+
 
         /* =========================
            GO TO DASHBOARD

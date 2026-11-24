@@ -64,6 +64,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             session_regenerate_id(true);
             $_SESSION['admin_username'] = $admin['username'];
+            setAdminRememberCookie($admin['username']);
 
             header("Location: admin-dashboard.php");
             exit();

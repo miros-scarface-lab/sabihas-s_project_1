@@ -193,6 +193,14 @@ if ($conn && !$conn->connect_error) {
     }
     // Clean up any default 'None' or empty values so Claim button appears
     @$conn->query("UPDATE `matches` SET `claim_status` = 'Not Claimed' WHERE `claim_status` IS NULL OR `claim_status` = '' OR `claim_status` = 'None'");
+
+    // Ensure session persistence table exists for cloud / serverless deployments
+    @$conn->query("CREATE TABLE IF NOT EXISTS `php_sessions` (
+      `id` VARCHAR(128) PRIMARY KEY,
+      `data` MEDIUMTEXT NOT NULL,
+      `timestamp` INT UNSIGNED NOT NULL,
+      INDEX (`timestamp`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
 }
 
 if (!$conn || $conn->connect_error) {
@@ -223,16 +231,135 @@ if (!$conn || $conn->connect_error) {
 $conn->set_charset("utf8mb4");
 
 
-// SECURE SESSION
+// SECURE SESSION & PERSISTENCE (30 Days)
 function configureSecureSession(): void
 {
     if (session_status() === PHP_SESSION_NONE) {
+        @ini_set('session.gc_maxlifetime', '2592000'); // 30 days
         session_set_cookie_params([
-            'secure' => isHttpsRequest(),
+            'lifetime' => 2592000, // 30 days (avoids dropping on browser/tab close)
+            'path'     => '/',
+            'secure'   => isHttpsRequest(),
             'httponly' => true,
             'samesite' => 'Lax'
         ]);
     }
+}
+
+function getAuthSigningKey(): string
+{
+    global $dbPass, $dbHost;
+    return hash('sha256', ($dbPass ?? 'secret') . ($dbHost ?? 'lostfound') . 'lf_salt_2026');
+}
+
+function setUserRememberCookie(int $userId): void
+{
+    $expires = time() + 2592000; // 30 days
+    $sig = hash_hmac('sha256', "user:{$userId}:{$expires}", getAuthSigningKey());
+    $payload = base64_encode("{$userId}:{$expires}:{$sig}");
+    setcookie('lostfound_auth', $payload, [
+        'expires'  => $expires,
+        'path'     => '/',
+        'secure'   => isHttpsRequest(),
+        'httponly' => true,
+        'samesite' => 'Lax'
+    ]);
+}
+
+function setAdminRememberCookie(string $username): void
+{
+    $expires = time() + 2592000; // 30 days
+    $sig = hash_hmac('sha256', "admin:{$username}:{$expires}", getAuthSigningKey());
+    $payload = base64_encode("{$username}:{$expires}:{$sig}");
+    setcookie('lostfound_admin_auth', $payload, [
+        'expires'  => $expires,
+        'path'     => '/',
+        'secure'   => isHttpsRequest(),
+        'httponly' => true,
+        'samesite' => 'Lax'
+    ]);
+}
+
+function clearUserRememberCookie(): void
+{
+    setcookie('lostfound_auth', '', [
+        'expires'  => time() - 86400,
+        'path'     => '/',
+        'secure'   => isHttpsRequest(),
+        'httponly' => true,
+        'samesite' => 'Lax'
+    ]);
+}
+
+function clearAdminRememberCookie(): void
+{
+    setcookie('lostfound_admin_auth', '', [
+        'expires'  => time() - 86400,
+        'path'     => '/',
+        'secure'   => isHttpsRequest(),
+        'httponly' => true,
+        'samesite' => 'Lax'
+    ]);
+}
+
+function restoreSessionFromRememberCookie(mysqli $conn): void
+{
+    // Auto-restore regular user session if serverless container restarted
+    if (empty($_SESSION['user_id']) && !empty($_COOKIE['lostfound_auth'])) {
+        $raw = base64_decode((string) $_COOKIE['lostfound_auth'], true);
+        if ($raw && substr_count($raw, ':') === 2) {
+            [$userId, $expires, $sig] = explode(':', $raw, 3);
+            if ((int) $expires > time()) {
+                $expected = hash_hmac('sha256', "user:{$userId}:{$expires}", getAuthSigningKey());
+                if (hash_equals($expected, $sig)) {
+                    $uStmt = $conn->prepare("SELECT user_id, full_name, student_id, email, department, role FROM users WHERE user_id = ? LIMIT 1");
+                    if ($uStmt) {
+                        $uIdInt = (int) $userId;
+                        $uStmt->bind_param("i", $uIdInt);
+                        $uStmt->execute();
+                        $uRes = $uStmt->get_result();
+                        if ($u = $uRes->fetch_assoc()) {
+                            $_SESSION['user_id']    = $u['user_id'];
+                            $_SESSION['full_name']  = $u['full_name'];
+                            $_SESSION['student_id'] = $u['student_id'];
+                            $_SESSION['department'] = $u['department'];
+                            $_SESSION['role']       = $u['role'];
+                        }
+                        $uStmt->close();
+                    }
+                }
+            }
+        }
+    }
+
+    // Auto-restore admin session if serverless container restarted
+    if (empty($_SESSION['admin_username']) && !empty($_COOKIE['lostfound_admin_auth'])) {
+        $raw = base64_decode((string) $_COOKIE['lostfound_admin_auth'], true);
+        if ($raw && substr_count($raw, ':') === 2) {
+            [$username, $expires, $sig] = explode(':', $raw, 3);
+            if ((int) $expires > time()) {
+                $expected = hash_hmac('sha256', "admin:{$username}:{$expires}", getAuthSigningKey());
+                if (hash_equals($expected, $sig)) {
+                    $aStmt = $conn->prepare("SELECT username FROM admins WHERE username = ? LIMIT 1");
+                    if ($aStmt) {
+                        $aStmt->bind_param("s", $username);
+                        $aStmt->execute();
+                        $aRes = $aStmt->get_result();
+                        if ($a = $aRes->fetch_assoc()) {
+                            $_SESSION['admin_username'] = $a['username'];
+                        }
+                        $aStmt->close();
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Automatically configure session lifetime and restore session if available
+configureSecureSession();
+if (session_status() === PHP_SESSION_ACTIVE) {
+    restoreSessionFromRememberCookie($conn);
 }
 
 

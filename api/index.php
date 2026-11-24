@@ -30,6 +30,19 @@ if (pathinfo($targetFile, PATHINFO_EXTENSION) === 'php') {
     $_SERVER['SCRIPT_FILENAME'] = $targetFile;
     $_SERVER['SCRIPT_NAME']     = '/' . $path;
     $_SERVER['PHP_SELF']        = '/' . $path;
+
+    // Ensure 30-day session lifetime across Vercel serverless functions
+    if (session_status() === PHP_SESSION_NONE) {
+        @ini_set('session.gc_maxlifetime', '2592000');
+        session_set_cookie_params([
+            'lifetime' => 2592000,
+            'path'     => '/',
+            'secure'   => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || !empty($_SERVER['HTTP_X_FORWARDED_PROTO']) || !empty($_SERVER['VERCEL']),
+            'httponly' => true,
+            'samesite' => 'Lax'
+        ]);
+    }
+
     require $targetFile;
     exit();
 }
