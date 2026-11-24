@@ -114,10 +114,23 @@ mysqli_report(MYSQLI_REPORT_OFF);
 if ($useSsl) {
     $conn = mysqli_init();
     if ($conn) {
-        // Allow connections to verified cloud MySQL providers with TLS
         @$conn->options(MYSQLI_OPT_SSL_VERIFY_SERVER_CERT, false);
         $conn->ssl_set(null, null, null, null, null);
         @$conn->real_connect($dbHost, $dbUser, $dbPass, $dbName, $dbPort, null, MYSQLI_CLIENT_SSL);
+        
+        // If the database does not exist yet (Error 1049: ER_BAD_DB_ERROR), connect to server and auto-create it
+        if ($conn->connect_errno === 1049) {
+            $conn = mysqli_init();
+            @$conn->options(MYSQLI_OPT_SSL_VERIFY_SERVER_CERT, false);
+            $conn->ssl_set(null, null, null, null, null);
+            if (@$conn->real_connect($dbHost, $dbUser, $dbPass, null, $dbPort, null, MYSQLI_CLIENT_SSL)) {
+                $safeDbName = preg_replace('/[^a-zA-Z0-9_]/', '', $dbName);
+                if (!empty($safeDbName)) {
+                    $conn->query("CREATE DATABASE IF NOT EXISTS `$safeDbName`");
+                    $conn->select_db($safeDbName);
+                }
+            }
+        }
     }
 } else {
     $conn = @new mysqli(
@@ -127,6 +140,37 @@ if ($useSsl) {
         $dbName,
         $dbPort
     );
+
+    if ($conn->connect_errno === 1049) {
+        $conn = @new mysqli($dbHost, $dbUser, $dbPass, null, $dbPort);
+        if (!$conn->connect_error) {
+            $safeDbName = preg_replace('/[^a-zA-Z0-9_]/', '', $dbName);
+            if (!empty($safeDbName)) {
+                $conn->query("CREATE DATABASE IF NOT EXISTS `$safeDbName`");
+                $conn->select_db($safeDbName);
+            }
+        }
+    }
+}
+
+// Auto-bootstrap tables from db.sql if database was just created or empty
+if ($conn && !$conn->connect_error) {
+    $tableCheck = @$conn->query("SHOW TABLES LIKE 'users'");
+    if ($tableCheck && $tableCheck->num_rows === 0) {
+        $sqlFile = __DIR__ . '/db.sql';
+        if (file_exists($sqlFile)) {
+            $sqlContent = file_get_contents($sqlFile);
+            if (!empty($sqlContent)) {
+                $conn->multi_query($sqlContent);
+                while ($conn->more_results() && $conn->next_result()) {
+                    // Flush multi-statement results
+                }
+            }
+        }
+    }
+    if ($tableCheck) {
+        $tableCheck->close();
+    }
 }
 
 if (!$conn || $conn->connect_error) {
