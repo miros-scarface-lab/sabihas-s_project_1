@@ -392,6 +392,7 @@ if (!empty($item['item_image']) && str_starts_with($item['item_image'], 'data:')
 
 <body>
 
+<?php include "navbar.php"; ?>
 
 <div class="details-page">
 

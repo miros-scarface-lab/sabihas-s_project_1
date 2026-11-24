@@ -202,6 +202,8 @@ $categoriesList = ['Electronics', 'Documents', 'Accessories', 'Books or Statione
 </head>
 <body>
 
+<?php include "navbar.php"; ?>
+
 <div class="search-hero">
     <h1>Search Lost & Found Items</h1>
     <p>Find items by name, category, campus location, or description.</p>

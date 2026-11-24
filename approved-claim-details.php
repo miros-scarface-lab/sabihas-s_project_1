@@ -284,6 +284,7 @@ if ($is_admin) {
 
 <body class="bg-gray-100 min-h-screen">
 
+<?php include "navbar.php"; ?>
 
 <div class="max-w-6xl mx-auto p-6">
 

@@ -149,6 +149,7 @@ if ($lost_image !== '') {
 
 <body class="bg-gray-100 min-h-screen">
 
+<?php include "navbar.php"; ?>
 
 <!-- ==========================================
      MAIN CONTAINER

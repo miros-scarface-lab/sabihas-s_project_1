@@ -144,208 +144,290 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-
-    <title>Add Lost Item</title>
-
+    <meta charset="UTF-8">
+    <title>Report Lost Item - Campus Lost &amp; Found</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <link rel="stylesheet" href="css/style.css">
-
     <style>
-
-        /* MOBILE RESPONSIVE DESIGN ONLY */
-
-        @media (max-width: 600px) {
-
-            body {
-                margin: 0;
-                padding: 0;
-                min-height: 100vh;
-            }
-
-            .container {
-                width: 100%;
-                max-width: 100%;
-                min-height: 100vh;
-                margin: 0;
-                padding: 12px 16px;
-                border-radius: 0;
-            }
-
-            h1 {
-                font-size: 22px;
-                margin-top: 5px;
-                margin-bottom: 12px;
-            }
-
-            form {
-                display: flex;
-                flex-direction: column;
-                gap: 7px;
-            }
-
-            form br {
-                display: none;
-            }
-
-            input,
-            select,
-            textarea {
-                width: 100%;
-                max-width: 100%;
-                box-sizing: border-box;
-                padding: 9px 10px;
-                font-size: 14px;
-                margin: 0;
-            }
-
-            textarea {
-                resize: vertical;
-            }
-
-            textarea[name="description"] {
-                height: 65px;
-                min-height: 65px;
-            }
-
-            textarea[name="secret_information"] {
-                height: 45px;
-                min-height: 45px;
-            }
-
-            label {
-                font-size: 13px;
-                margin-bottom: 0;
-            }
-
-            small {
-                font-size: 11px;
-            }
-
-            button {
-                width: 100%;
-                padding: 10px;
-                font-size: 14px;
-                margin-top: 3px;
-            }
-
-            form a {
-                text-align: center;
-                font-size: 13px;
-                margin-top: 2px;
-            }
-
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f4f7f9;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            color: #1e293b;
         }
 
+        .clf-form-wrapper {
+            max-width: 650px;
+            margin: 35px auto 60px;
+            padding: 0 16px;
+        }
+
+        .clf-form-card {
+            background: #ffffff;
+            border-radius: 18px;
+            padding: 35px 32px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 10px 30px rgba(0, 56, 68, 0.08);
+        }
+
+        .clf-form-header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .clf-form-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .clf-form-header h1 {
+            margin: 0 0 8px;
+            color: #003844;
+            font-size: 26px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .clf-form-header p {
+            margin: 0;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .clf-form-body {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .clf-field-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .clf-field-group label {
+            font-size: 13px;
+            font-weight: 700;
+            color: #334155;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .clf-field-group label .clf-req {
+            color: #dc2626;
+            font-weight: 800;
+        }
+
+        .clf-field-group label .clf-opt {
+            color: #94a3b8;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .clf-input,
+        .clf-select,
+        .clf-textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 10px;
+            font-size: 14px;
+            color: #0f172a;
+            background: #ffffff;
+            outline: none;
+            transition: all 0.2s ease;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+
+        .clf-input:focus,
+        .clf-select:focus,
+        .clf-textarea:focus {
+            border-color: #0fa4af;
+            box-shadow: 0 0 0 3px rgba(15, 164, 175, 0.15);
+            background: #ffffff;
+        }
+
+        .clf-textarea {
+            resize: vertical;
+            min-height: 85px;
+        }
+
+        .clf-file-box {
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            background: #f8fafc;
+            transition: 0.2s ease;
+        }
+
+        .clf-file-box:hover {
+            border-color: #0fa4af;
+            background: #f0fdfa;
+        }
+
+        .clf-file-input {
+            width: 100%;
+            font-size: 13px;
+            color: #475569;
+        }
+
+        .clf-file-hint {
+            display: block;
+            margin-top: 6px;
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .clf-submit-btn {
+            margin-top: 10px;
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 11px;
+            background: linear-gradient(135deg, #003844, #0fa4af);
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 56, 68, 0.2);
+            transition: all 0.2s ease;
+        }
+
+        .clf-submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 22px rgba(0, 56, 68, 0.28);
+        }
+
+        .clf-submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .clf-back-link {
+            text-align: center;
+            margin-top: 18px;
+        }
+
+        .clf-back-link a {
+            color: #0fa4af;
+            text-decoration: none;
+            font-size: 13.5px;
+            font-weight: 700;
+            transition: 0.2s;
+        }
+
+        .clf-back-link a:hover {
+            color: #003844;
+            text-decoration: underline;
+        }
+
+        @media (max-width: 600px) {
+            .clf-form-card {
+                padding: 24px 18px;
+                border-radius: 14px;
+            }
+            .clf-form-header h1 {
+                font-size: 22px;
+            }
+        }
     </style>
-
 </head>
-
-
 <body>
 
-<div class="container">
+<?php include "navbar.php"; ?>
 
-<h1>Add Lost Item</h1>
+<div class="clf-form-wrapper">
+    <div class="clf-form-card">
+        <div class="clf-form-header">
+            <span class="clf-form-badge">Lost Item</span>
+            <h1>Add Lost Item</h1>
+            <p>Provide detailed item information to help matching and fast recovery.</p>
+        </div>
 
+        <form action="" method="POST" enctype="multipart/form-data" class="clf-form-body">
+            <!-- Item Name -->
+            <div class="clf-field-group">
+                <label>Item Name <span class="clf-req">*</span></label>
+                <input type="text" name="item_name" class="clf-input" placeholder="e.g. Black Leather Wallet, Student ID Card..." required>
+            </div>
 
-<form action="" method="POST" enctype="multipart/form-data">
+            <!-- Category -->
+            <div class="clf-field-group">
+                <label>Category <span class="clf-req">*</span></label>
+                <select name="category" class="clf-select" required>
+                    <option value="">Select Category</option>
+                    <option value="Electronics">Electronics</option>
+                    <option value="Documents">Documents</option>
+                    <option value="Accessories">Accessories</option>
+                    <option value="Books or Stationery">Books or Stationery</option>
+                    <option value="Others">Others</option>
+                </select>
+            </div>
 
+            <!-- Description -->
+            <div class="clf-field-group">
+                <label>Description <span class="clf-req">*</span></label>
+                <textarea name="description" rows="4" class="clf-textarea" placeholder="Describe the item's brand, color, distinguishing marks, etc." required></textarea>
+            </div>
 
-<input type="text" name="item_name" placeholder="Item Name" required>
+            <!-- Lost Date -->
+            <div class="clf-field-group">
+                <label>Lost Date <span class="clf-req">*</span></label>
+                <input type="date" name="lost_date" class="clf-input" required>
+            </div>
 
-<br><br>
+            <!-- Lost Location -->
+            <div class="clf-field-group">
+                <label>Lost Location <span class="clf-req">*</span></label>
+                <input type="text" name="lost_location" class="clf-input" placeholder="e.g. Central Library 2nd Floor, Cafeteria, Room 302..." required>
+            </div>
 
+            <!-- Contact Information -->
+            <div class="clf-field-group">
+                <label>Contact Information <span class="clf-req">*</span></label>
+                <input type="text" name="contact_information" class="clf-input" placeholder="Your phone number, room, or WhatsApp" required>
+            </div>
 
-<select name="category" required>
+            <!-- Secret Information -->
+            <div class="clf-field-group">
+                <label>Secret Verification Information <span class="clf-opt">(Only visible during claim approval)</span></label>
+                <textarea name="secret_information" rows="3" class="clf-textarea" placeholder="Private proof of ownership (e.g. ID card number inside, engraving, specific lock screen wallpaper, hidden scratch)"></textarea>
+            </div>
 
-    <option value="">Select Category</option>
+            <!-- Optional Image Upload -->
+            <div class="clf-field-group">
+                <label>Item Picture <span class="clf-opt">(Optional)</span></label>
+                <div class="clf-file-box">
+                    <input type="file" name="item_image" class="clf-file-input" accept="image/jpeg,image/png,image/webp">
+                    <span class="clf-file-hint">Upload JPG, PNG or WEBP (Max 5MB). Photo helps identify the item faster.</span>
+                </div>
+            </div>
 
-    <option>Electronics</option>
+            <button type="submit" class="clf-submit-btn">Submit Lost Item</button>
 
-    <option>Documents</option>
-
-    <option>Accessories</option>
-
-    <option>Books or Stationery</option>
-
-    <option>Others</option>
-
-</select>
-
-<br><br>
-
-
-<textarea name="description"
-rows="5"
-placeholder="Description"
-required></textarea>
-
-<br><br>
-
-
-<label>Lost Date</label><br>
-
-<input type="date" name="lost_date" required>
-
-<br><br>
-
-
-<input type="text"
-name="lost_location"
-placeholder="Lost Location"
-required>
-
-<br><br>
-
-
-<input type="text"
-name="contact_information"
-placeholder="Contact Information"
-required>
-
-<br><br>
-
-
-<textarea name="secret_information"
-rows="5"
-placeholder="Secret Information"></textarea>
-
-<br><br>
-
-
-<!-- ==============================
-     OPTIONAL IMAGE
-============================== -->
-
-<label>Item Picture (Optional)</label><br>
-
-<input type="file"
-       name="item_image"
-       accept="image/jpeg,image/png,image/webp">
-
-<br>
-
-<small>You can upload a picture if you want.</small>
-
-<br><br>
-
-
-<button type="submit">Submit</button>
-
-<br><br>
-
-
-<a href="dashboard.php">Back to Dashboard</a>
-
-
-</form>
-
+            <div class="clf-back-link">
+                <a href="dashboard.php">← Back to Dashboard</a>
+            </div>
+        </form>
+    </div>
 </div>
 
 </body>
-
 </html>

@@ -125,6 +125,7 @@ $stmt->close();
 
 <body class="bg-gray-100 min-h-screen">
 
+<?php include "navbar.php"; ?>
 
 <div class="max-w-4xl mx-auto p-6">
 

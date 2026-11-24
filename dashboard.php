@@ -764,6 +764,11 @@ function getItemGraphic($name)
 
 
 <!-- ==========================================
+     MOBILE SIDEBAR BACKDROP
+========================================== -->
+<div id="mobileSidebarBackdrop" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden transition-opacity lg:hidden" aria-hidden="true"></div>
+
+<!-- ==========================================
      SIDEBAR
 ========================================== -->
 
@@ -1005,22 +1010,23 @@ function getItemGraphic($name)
            shadow-[0_1px_2px_rgba(0,0,0,0.03)]"
 >
 
-    <div class="flex items-center gap-4">
+    <div class="flex items-center gap-3">
 
         <button
             type="button"
             id="mobileMenuButton"
-            aria-label="Toggle navigation menu"
+            aria-label="Toggle dashboard menu"
             aria-expanded="false"
-            class="lg:hidden text-slate-600
-                   hover:text-slate-900
-                   focus:outline-none"
+            class="text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 p-2 rounded-xl transition flex items-center gap-1.5 focus:outline-none cursor-pointer"
+            title="Tap three dots to view Dashboard Menu"
         >
 
             <i
-                data-lucide="menu"
-                class="w-5 h-5"
+                data-lucide="more-vertical"
+                class="w-5 h-5 text-[#003844]"
             ></i>
+
+            <span class="text-xs font-bold text-slate-700 hidden sm:inline">Dashboard</span>
 
         </button>
 
@@ -2298,75 +2304,72 @@ function getItemGraphic($name)
 
     const mobileMenuButton = document.getElementById('mobileMenuButton');
     const mobileSidebar = document.getElementById('mobileSidebar');
+    const mobileSidebarBackdrop = document.getElementById('mobileSidebarBackdrop');
+
+    function openMobileSidebar() {
+        if (!mobileSidebar) return;
+        mobileSidebar.classList.remove('hidden');
+        if (mobileSidebarBackdrop) mobileSidebarBackdrop.classList.remove('hidden');
+        if (mobileMenuButton) mobileMenuButton.setAttribute('aria-expanded', 'true');
+    }
+
+    function closeMobileSidebar() {
+        if (!mobileSidebar) return;
+        if (window.innerWidth < 1024) {
+            mobileSidebar.classList.add('hidden');
+            if (mobileSidebarBackdrop) mobileSidebarBackdrop.classList.add('hidden');
+            if (mobileMenuButton) mobileMenuButton.setAttribute('aria-expanded', 'false');
+        }
+    }
 
     if (mobileMenuButton && mobileSidebar) {
 
-        mobileMenuButton.addEventListener('click', function () {
-
+        mobileMenuButton.addEventListener('click', function (e) {
+            e.stopPropagation();
             if (window.innerWidth < 1024) {
-
+                if (mobileSidebar.classList.contains('hidden')) {
+                    openMobileSidebar();
+                } else {
+                    closeMobileSidebar();
+                }
+            } else {
+                // Desktop toggle / highlight
                 mobileSidebar.classList.toggle('hidden');
-
-                mobileMenuButton.setAttribute(
-                    'aria-expanded',
-                    !mobileSidebar.classList.contains('hidden')
-                );
-
             }
-
         });
 
+        if (mobileSidebarBackdrop) {
+            mobileSidebarBackdrop.addEventListener('click', closeMobileSidebar);
+        }
 
         // Close sidebar after clicking any sidebar link
-
         const sidebarLinks = mobileSidebar.querySelectorAll('a');
-
         sidebarLinks.forEach(function (link) {
-
             link.addEventListener('click', function () {
-
                 if (window.innerWidth < 1024) {
-
-                    mobileSidebar.classList.add('hidden');
-
-                    mobileMenuButton.setAttribute(
-                        'aria-expanded',
-                        'false'
-                    );
-
+                    closeMobileSidebar();
                 }
-
             });
-
         });
-
 
         // Reset sidebar when switching to desktop screen
-
         window.addEventListener('resize', function () {
-
             if (window.innerWidth >= 1024) {
-
                 mobileSidebar.classList.remove('hidden');
-
-                mobileMenuButton.setAttribute(
-                    'aria-expanded',
-                    'false'
-                );
-
+                if (mobileSidebarBackdrop) mobileSidebarBackdrop.classList.add('hidden');
+                mobileMenuButton.setAttribute('aria-expanded', 'false');
             } else {
-
                 mobileSidebar.classList.add('hidden');
-
-                mobileMenuButton.setAttribute(
-                    'aria-expanded',
-                    'false'
-                );
-
+                if (mobileSidebarBackdrop) mobileSidebarBackdrop.classList.add('hidden');
+                mobileMenuButton.setAttribute('aria-expanded', 'false');
             }
-
         });
 
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && window.innerWidth < 1024 && !mobileSidebar.classList.contains('hidden')) {
+                closeMobileSidebar();
+            }
+        });
     }
 
 </script>

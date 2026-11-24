@@ -991,6 +991,7 @@ body {
 
 <body>
 
+<?php include "navbar.php"; ?>
 
 <div class="matches-container">
 
