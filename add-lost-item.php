@@ -70,14 +70,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         $destination = $upload_folder . $new_file_name;
 
-        if (@move_uploaded_file($tmp_name, $destination)) {
+        // Compress and resize image to prevent 4.5MB serverless payload limit
+        $compressed = compressAndResizeImage($tmp_name, 800, 75);
+
+        if (@file_put_contents($destination, $compressed) !== false) {
             $item_image = $destination;
         } else {
             // On serverless clouds (like Vercel) where local disk is read-only,
-            // store the image as a Data URI directly in the database
-            $fileData = @file_get_contents($tmp_name);
-            if ($fileData !== false) {
-                $item_image = 'data:' . $mime_type . ';base64,' . base64_encode($fileData);
+            // store the compressed image as a Data URI directly in the database (~50-90KB)
+            if (!empty($compressed)) {
+                $item_image = 'data:image/jpeg;base64,' . base64_encode($compressed);
             }
         }
     }

@@ -201,6 +201,13 @@ if ($conn && !$conn->connect_error) {
       `timestamp` INT UNSIGNED NOT NULL,
       INDEX (`timestamp`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+    // Clean up any oversized base64 images that exceed Vercel 4.5MB serverless payload limit
+    @$conn->query("UPDATE `lost_items` SET `item_image` = NULL WHERE LENGTH(`item_image`) > 1500000");
+    @$conn->query("UPDATE `found_items` SET `item_image` = NULL WHERE LENGTH(`item_image`) > 1500000");
+
+    // Ensure admin default password is set to 'sabihashreya'
+    @$conn->query("UPDATE `admins` SET `password` = 'sabihashreya' WHERE `username` = 'admin'");
 }
 
 if (!$conn || $conn->connect_error) {
@@ -360,6 +367,56 @@ function restoreSessionFromRememberCookie(mysqli $conn): void
 configureSecureSession();
 if (session_status() === PHP_SESSION_ACTIVE) {
     restoreSessionFromRememberCookie($conn);
+}
+
+
+// IMAGE RESIZING & COMPRESSION (prevents 4.5MB Vercel serverless payload overflow)
+function compressAndResizeImage(string $filePath, int $maxDim = 800, int $quality = 75): string
+{
+    $imgData = @file_get_contents($filePath);
+    if ($imgData === false) {
+        return '';
+    }
+
+    if (!extension_loaded('gd') || !function_exists('imagecreatefromstring')) {
+        return $imgData;
+    }
+
+    $src = @imagecreatefromstring($imgData);
+    if (!$src) {
+        return $imgData;
+    }
+
+    $w = imagesx($src);
+    $h = imagesy($src);
+
+    if ($w <= $maxDim && $h <= $maxDim && strlen($imgData) < 200 * 1024) {
+        imagedestroy($src);
+        return $imgData;
+    }
+
+    $ratio = min($maxDim / max($w, 1), $maxDim / max($h, 1), 1.0);
+    $newW = (int) max(1, round($w * $ratio));
+    $newH = (int) max(1, round($h * $ratio));
+
+    $dst = imagecreatetruecolor($newW, $newH);
+    if (!$dst) {
+        imagedestroy($src);
+        return $imgData;
+    }
+
+    imagealphablending($dst, false);
+    imagesavealpha($dst, true);
+    imagecopyresampled($dst, $src, 0, 0, 0, 0, $newW, $newH, $w, $h);
+
+    ob_start();
+    imagejpeg($dst, null, $quality);
+    $compressed = ob_get_clean();
+
+    imagedestroy($src);
+    imagedestroy($dst);
+
+    return ($compressed !== false && strlen($compressed) > 0) ? $compressed : $imgData;
 }
 
 

@@ -24,11 +24,11 @@ CREATE TABLE IF NOT EXISTS `admins` (
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Default Admin Account (username: admin, password: password123)
+-- Default Admin Account (username: admin, password: sabihashreya)
 -- The application's verifyPasswordAndUpgrade() will automatically upgrade it to secure bcrypt on first login
 INSERT INTO `admins` (`username`, `password`) 
-VALUES ('admin', 'password123')
-ON DUPLICATE KEY UPDATE `username` = `username`;
+VALUES ('admin', 'sabihashreya')
+ON DUPLICATE KEY UPDATE `password` = 'sabihashreya';
 
 -- 3. Lost Items Table
 CREATE TABLE IF NOT EXISTS `lost_items` (
