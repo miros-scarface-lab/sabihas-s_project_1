@@ -42,7 +42,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         // Create uploads folder if it doesn't exist
         if (!is_dir($upload_folder)) {
-            mkdir($upload_folder, 0755, true);
+            @mkdir($upload_folder, 0755, true);
         }
 
         $tmp_name = $_FILES['item_image']['tmp_name'];

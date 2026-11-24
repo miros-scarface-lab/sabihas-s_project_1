@@ -35,10 +35,25 @@ if (!isLocalRequest() && !isHttpsRequest()) {
 $dbConfig = require __DIR__ . '/config.php';
 $dbEnv    = isLocalRequest() ? $dbConfig['local'] : $dbConfig['live'];
 
-$dbHost = getenv('DB_HOST') ?: $dbEnv['host'];
-$dbUser = getenv('DB_USER') ?: $dbEnv['user'];
-$dbPass = getenv('DB_PASS') ?: $dbEnv['pass'];
-$dbName = getenv('DB_NAME') ?: $dbEnv['name'];
+$dbHost = $_ENV['DB_HOST'] ?? $_SERVER['DB_HOST'] ?? getenv('DB_HOST') ?: $dbEnv['host'];
+$dbUser = $_ENV['DB_USER'] ?? $_SERVER['DB_USER'] ?? getenv('DB_USER') ?: $dbEnv['user'];
+$dbPass = $_ENV['DB_PASS'] ?? $_SERVER['DB_PASS'] ?? getenv('DB_PASS') ?: $dbEnv['pass'];
+$dbName = $_ENV['DB_NAME'] ?? $_SERVER['DB_NAME'] ?? getenv('DB_NAME') ?: $dbEnv['name'];
+$dbPort = (int) ($_ENV['DB_PORT'] ?? $_SERVER['DB_PORT'] ?? getenv('DB_PORT') ?: 3306);
+
+// Support host:port syntax in DB_HOST (common in cloud databases like Railway, Aiven, TiDB)
+if (strpos((string) $dbHost, ':') !== false) {
+    $hostParts = explode(':', (string) $dbHost, 2);
+    $dbHost    = $hostParts[0];
+    if (!empty($hostParts[1]) && is_numeric($hostParts[1])) {
+        $dbPort = (int) $hostParts[1];
+    }
+}
+
+$useSsl = !empty($_ENV['DB_SSL']) ||
+          !empty($_SERVER['DB_SSL']) ||
+          getenv('DB_SSL') === 'true' ||
+          getenv('DB_SSL') === '1';
 
 unset($dbConfig, $dbEnv);
 
@@ -46,15 +61,24 @@ unset($dbConfig, $dbEnv);
 // DATABASE CONNECTION
 mysqli_report(MYSQLI_REPORT_OFF);
 
-$conn = @new mysqli(
-    $dbHost,
-    $dbUser,
-    $dbPass,
-    $dbName
-);
+if ($useSsl) {
+    $conn = mysqli_init();
+    if ($conn) {
+        $conn->ssl_set(null, null, null, null, null);
+        @$conn->real_connect($dbHost, $dbUser, $dbPass, $dbName, $dbPort);
+    }
+} else {
+    $conn = @new mysqli(
+        $dbHost,
+        $dbUser,
+        $dbPass,
+        $dbName,
+        $dbPort
+    );
+}
 
-if ($conn->connect_error) {
-    error_log("DB connection failed: " . $conn->connect_error);
+if (!$conn || $conn->connect_error) {
+    error_log("DB connection failed: " . ($conn ? $conn->connect_error : 'Initialization failed'));
     die("Database connection failed. Please try again later.");
 }
 
