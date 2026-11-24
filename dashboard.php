@@ -858,7 +858,7 @@ function getItemGraphic($name)
 
 
             <a
-                href="search-item.html"
+                href="search-item.php"
                 class="flex items-center gap-3.5
                        px-4 py-3
                        text-teal-100/70
@@ -1389,7 +1389,7 @@ function getItemGraphic($name)
     <!-- SEARCH -->
 
     <a
-        href="search-item.html"
+        href="search-item.php"
         class="bg-[#fffbeb]
                hover:bg-[#fef3c7]
                border border-[#fde68a]/80

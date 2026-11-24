@@ -12,7 +12,7 @@
 
     <h1>Search Item</h1>
 
-    <form action="search-item.php" method="POST">
+    <form action="search-item.php" method="GET">
 
     <!-- Item Name -->
     <input type="text" 
@@ -36,17 +36,22 @@
 
     <!-- Status -->
     <select name="status">
-        <option value="">Select Status</option>
-        <option value="All">All</option>
+        <option value="All" selected>All (Lost & Found)</option>
         <option value="Lost">Lost</option>
         <option value="Found">Found</option>
     </select>
 
     <br><br>
 
+    <!-- Location -->
+    <input type="text" 
+    name="location"
+    placeholder="Location (Example: Library, Cafeteria)">
+    <br><br>
+
 
     <!-- Search Button -->
-    <button type="submit" name="search">Search</button>
+    <button type="submit">Search</button>
 
     </form>
 
